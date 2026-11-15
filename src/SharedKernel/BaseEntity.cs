@@ -1,4 +1,4 @@
-namespace ELearning.SharedKernal
+namespace ELearning.SharedKernel
 {
     public abstract class BaseEntity
     {

@@ -1,0 +1,23 @@
+# .NET build output
+bin/
+obj/
+
+# IDE / editor
+.vs/
+.idea/
+*.user
+*.suo
+*.swp
+*~
+
+# Local environment and secrets
+appsettings.Development.json
+appsettings.*.local.json
+*.local.json
+
+# Local review / setup notes
+DI_SETUP.txt
+FILE_CHANGES.txt
+
+# Logs
+*.log
