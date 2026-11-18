@@ -12,5 +12,5 @@ public class Lesson : BaseEntity
     public string? ContentUrl { get; set; }
     public int DurationSeconds { get; set; }
     public int Order { get; set; }
-    public bool IsFreePreview { get; set; }
+    public bool IsFreePreview { get; set; } = false;
 }
