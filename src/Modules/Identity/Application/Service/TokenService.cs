@@ -41,7 +41,7 @@ public class TokenService
 
         // 4. Create signing key
         var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_config["Jwt:Key"]!)
+            Encoding.UTF8.GetBytes(_config["Jwt:SecretKey"]!)
         );
 
         // 5. Create signing credentials
@@ -56,7 +56,7 @@ public class TokenService
             audience: _config["Jwt:Audience"],
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(
-                double.Parse(_config["Jwt:DurationInMinutes"]!)
+                double.Parse(_config["Jwt:AccessTokenExpirationMinutes"]!)
             ),
             signingCredentials: creds
         );

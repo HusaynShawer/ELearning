@@ -16,7 +16,7 @@ public class AuthService
         _tokenService = tokenService;
     }
 
-    public async Task<bool> Register(RegisterRequestDto request)
+    public async Task<RegisterResponseDto> Register(RegisterRequestDto request)
     {
         var existedUser = await _userManager.FindByEmailAsync(request.Email);
 
@@ -54,7 +54,10 @@ public class AuthService
             throw new InvalidOperationException(errors);
         }
 
-        return true;
+        return new RegisterResponseDto
+        {
+            UserId = user.Id
+        };
     }
 
     public async Task<LoginResponseDto> LogIn(string email, string password)

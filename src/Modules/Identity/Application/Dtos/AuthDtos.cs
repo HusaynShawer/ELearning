@@ -25,11 +25,17 @@ public class RegisterRequestDto
     public string ConfirmPassword { get; set; } = string.Empty;
 }
 
+public class RegisterResponseDto
+{
+    public Guid UserId { get; set; }
+}
+
 public class LoginResponseDto
 {
     public string Token { get; set; } = string.Empty;
 
     public Guid UserId { get; set; }
+
 
     public string Email { get; set; } = string.Empty;
 

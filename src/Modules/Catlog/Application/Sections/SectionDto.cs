@@ -6,5 +6,5 @@ public class SectionDto
     public string Title { get; set; } = default!;
     public int Order { get; set; }
 
-    public ICollection<LessonDto> Lessons { get; set; } = new List<Lesson>(); 
+    public ICollection<LessonDto> Lessons { get; set; } = new List<LessonDto>(); 
 }
