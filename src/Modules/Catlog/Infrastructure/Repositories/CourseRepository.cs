@@ -25,4 +25,19 @@ public class CourseRepository
     {
         return await _context.Courses.Where(c => c.InstructorId == instructorId).ToListAsync();
     }
+
+    public async Task<IEnumerable<Course>> GetCoursesByCategory(Guid categoryId)
+    {
+        return await _context.Courses.Where(c => c.CategoryId == categoryId).ToListAsync();
+    }
+    public async Task<IEnumerable<Course>> GetAllCoursesAsync()
+    {
+        return await _context.Courses.ToListAsync();
+    }   
+
+    // get course by id
+    public async Task<Course?> GetCourseByIdAsync(Guid courseId)
+    {
+        return await _context.Courses.FindAsync(courseId);
+    }
 }

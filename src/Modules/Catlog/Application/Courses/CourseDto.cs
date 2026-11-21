@@ -1,5 +1,5 @@
 using ELearning.Catalog.Domain;
-namespace ELearning.Catalog.Application;
+namespace ELearning.Catalog.Application.Dtos;
 
 public class CourseRequestDto
 {
@@ -12,7 +12,7 @@ public class CourseRequestDto
     public CourseStatus Status { get; set; } = CourseStatus.Draft;
     public Guid InstructorId { get; set; }
     public Guid CategoryId { get; set; }
-    public ICollection<SectionDto> Sections {get; set;} = new List<SectionDto>();
+    public ICollection<SectionWithCourseDto> Sections {get; set;} = new List<SectionWithCourseDto>();
 
 }
 
@@ -26,5 +26,5 @@ public class CourseResponeDto
     public CourseLevel Level {get;set;}
     public Guid InstructorId { get; set; }
     public Guid CategoryId { get; set; }
-    public ICollection<SectionDto> Sections {get; set;} = new List<SectionDto>();
+    public ICollection<SectionWithCourseDto> Sections {get; set;} = new List<SectionWithCourseDto>();
 }
