@@ -1,8 +1,7 @@
+using ELearning.Catalog.Application;
 using ELearning.Catalog.Application.Service;
 using ELearning.Catalog.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ELearning.Catalog;
 
@@ -13,12 +12,18 @@ public static class CatalogModuleExtensions
         services.AddDbContext<CatalogDbContext>(o =>
             o.UseNpgsql(config.GetConnectionString("Default"),
                 s => s.MigrationsHistoryTable("__EFMigrationsHistory", CatalogDbContext.Schema)));
-
+        // repos
         services.AddScoped<CourseRepository>();
-        services.AddScoped<CourseService>();
-        services.AddScoped<UnitOfWork>();
+        services.AddScoped<SectionRepository>();
         services.AddScoped<CategoryRepository>();
+        services.AddScoped<LessonRepository>();
+//      services
+        services.AddScoped<CourseService>();
         services.AddScoped<categoryService>();
+        services.AddScoped<SectionService>();
+        services.AddScoped<LessonService>();
+        services.AddScoped<UnitOfWork>();
+        services.AddScoped<IVideoStorageService , LocalVideoStorgeService>();
         return services;
     }
 }
