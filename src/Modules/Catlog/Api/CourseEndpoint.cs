@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.HttpResults;
 using ELearning.Catalog.Application;
 using ELearning.Catalog.Application.Dtos;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class CourseController : ControllerBase
 {
     private readonly CourseService _courseService;

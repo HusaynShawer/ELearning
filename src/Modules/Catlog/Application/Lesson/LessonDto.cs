@@ -14,7 +14,7 @@ public class LessonWithSectionDto
 
 public class LessonDto
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     public Guid SectionId { get; set; }
 
     public string Title { get; set; } = default!;

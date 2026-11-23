@@ -34,7 +34,18 @@ public class LessonService
 
         await _lessonRepository.AddAsync(lesson);
         await _uow.SaveAsync();
-        return lessonDto;
+        
+        return new LessonDto
+        {
+            Id = lesson.Id,
+            SectionId = lesson.SectionId,
+            Title = lesson.Title,
+            Type = lesson.Type,
+            ContentUrl = lesson.ContentUrl,
+            DurationSeconds = lesson.DurationSeconds,
+            Order = lesson.Order,
+            IsFreePreview = lesson.IsFreePreview
+        };
     }
 
     public async Task<IEnumerable<LessonDto>> GetAll(Guid sectionId)
@@ -54,6 +65,7 @@ public class LessonService
 
         var videoKey = await _localVideoStorgeService.UploadAsync(
             video,
+            lessonId,
             cancellationToken
         );
 

@@ -1,6 +1,7 @@
 using ELearning.Catalog.Application.Dtos;
 using ELearning.Catalog.Domain;
 using ELearning.Catalog.Infrastructure;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 public class SectionRepository
@@ -33,5 +34,10 @@ public class SectionRepository
                 IsFreePreview = l.IsFreePreview
             }).ToList()
         }).ToList();
+    }
+
+    public async Task<Section?> GetById(Guid sectionId)
+    {
+        return await _context.Sections.FindAsync(sectionId);
     }
 }

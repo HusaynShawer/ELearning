@@ -42,4 +42,14 @@ public class SectionService
         var sections = await _sectionRepository.GetAll(courseId);
         return sections.Any() ? sections : throw new Exception("no section in this course");
     }
+
+    public async Task<Section> GetById(Guid sectionId)
+    {
+        var section =  await _sectionRepository.GetById(sectionId);
+        if (section is null)
+        {
+            throw new Exception("no section found");
+        }
+        return section;
+    }
 }

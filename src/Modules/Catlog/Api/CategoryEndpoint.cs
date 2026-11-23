@@ -5,6 +5,7 @@ using ELearning.Catalog.Application.Dtos;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class CategoryEndpoint :ControllerBase
 {
     private readonly categoryService _categoryService;
