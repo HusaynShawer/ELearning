@@ -1,0 +1,169 @@
+====================================================================
+WHY `User` IS NOT DEFINED IN EnrollmentController.cs
+====================================================================
+
+File:   src/Modules/Enrollment/API/EnrollmentController.cs
+Line:   20
+Code:   var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+--------------------------------------------------------------------
+1. THE CAUSE
+--------------------------------------------------------------------
+
+The class declaration is:
+
+    public class EnrollmentController      <-- note: NO base class
+
+`User` is NOT a global/static member of ASP.NET Core. It is a
+property defined on the `ControllerBase` class:
+
+    public ClaimsPrincipal User { get; }
+
+Every controller that wants to use `User`, `HttpContext`,
+`ModelState`, `Request`, `Response`, `Created()`, `Ok()`, `NotFound()`,
+etc. MUST inherit from `ControllerBase` (or from `Controller`, which
+itself inherits from `ControllerBase`).
+
+Because `EnrollmentController` inherits from nothing (it implicitly
+inherits from `System.Object`), the compiler sees no `User` member in
+the class or its base types, and reports:
+
+    CS0103: The name 'User' does not exist in the current context
+
+This is a compile-time error, not a runtime error.
+
+Note: the `[ApiController]` attribute does NOT add members to the
+class. It only enables API-specific conventions (automatic 400
+responses, binding source inference, problem details, etc.). It does
+not make `User` available.
+
+Proof that this is the problem: every other controller in this
+solution already does it correctly:
+
+    src/Modules/Catlog/Api/CourseEndpoint.cs  -> : ControllerBase
+    src/Modules/Catlog/Api/LessonEndpoint.cs  -> : ControllerBase
+    src/Modules/Identity/API/AuthEndPoint.cs  -> : ControllerBase
+    src/Modules/Identity/API/UserEndpoint.cs  -> : ControllerBase
+
+--------------------------------------------------------------------
+2. OTHER ERRORS IN THE SAME FILE (they will surface right after)
+--------------------------------------------------------------------
+
+Fixing the base class alone will NOT compile this file. There are
+more problems:
+
+a) Line 21: `studentId` is not defined anywhere.
+   CS0103: The name 'studentId' does not exist in the current context
+   The variable you just created is called `userId`.
+
+b) Type mismatch: `User.FindFirstValue(...)` returns `string?`, but
+   `EnrollmentService.AddAsync(EnrollmentDto, Guid)` expects a `Guid`.
+   You must parse the claim value to a Guid first.
+
+c) Line 22 / 30: `CreatedResult()` is being called like a method, but
+   `CreatedResult` is a CLASS name, not a method. The method is
+   `Created(...)` (inherited from ControllerBase) or better
+   `CreatedAtAction(...)`. Current code:
+   CS1955: Non-invocable member 'CreatedResult' cannot be used like a
+   method. (And an object-creation expression is required.)
+
+d) Line 28: `var userId =` has no expression after the `=`.
+   CS1525: Invalid expression term ';'
+
+e) Line 29: `IsEnrolled(studentId)` does not match the service:
+   `IsEnrolled(Guid studentId, Guid courseId)` needs TWO arguments.
+
+f) Line 26: `IsEnrolled` is decorated with `[HttpGet]` but takes an
+   `EnrollmentDto` from the body. GET requests normally have no body,
+   so the DTO will be null/default at runtime. It should read the
+   courseId from the route or query string.
+
+g) Line 8: `public class EnrollmentController` is declared without
+   the `public` keyword? No - it IS `public class`. That part is fine.
+   (If it were internal, MVC's ControllerFeatureProvider would skip
+   it during discovery and you would get 404s.)
+
+--------------------------------------------------------------------
+3. THE SOLUTION (explained, no changes made to the .cs file)
+--------------------------------------------------------------------
+
+Step 1 - Make the controller a real controller:
+
+    Change:
+        public class EnrollmentController
+    To:
+        public class EnrollmentController : ControllerBase
+
+    This brings in `User`, `HttpContext`, `Created()`, `Ok()`,
+    `NotFound()`, `ModelState`, etc. No extra using directive is
+    needed because `Microsoft.AspNetCore.Mvc` is already imported at
+    the top of the file.
+
+Step 2 - Parse the string claim into a Guid:
+
+    `ClaimTypes.NameIdentifier` stores the user id as a STRING. Do not
+    pass it directly where a Guid is required. Validate it and handle
+    the failure (bad/missing claim):
+
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+        // now `userId` is a Guid
+
+    (Using `Guid.Parse` also works but throws an exception on bad
+    input, which would produce a 500 instead of a clean 401.)
+
+Step 3 - Pass the real variable to the service:
+
+    Replace `studentId` with `userId`:
+
+        await _enrollmentService.AddAsync(enrollmentDto, userId);
+
+    The service signature is:
+        Task AddAsync(EnrollmentDto enrollmentDto, Guid studentId)
+    so a Guid is exactly what it wants.
+
+Step 4 - Fix the response:
+
+    `CreatedResult()` is a type, not a method. Either:
+
+        return Created();                          // empty 201
+    or, if the new enrollment id/route is known:
+        return CreatedAtAction(nameof(...), new { id = ... }, null);
+
+Step 5 - Fix IsEnrolled:
+
+    Complete line 28 (call FindFirstValue + TryParse as in Step 2),
+    then call the service with BOTH arguments:
+
+        await _enrollmentService.IsEnrolled(userId, courseId);
+
+    And change the endpoint so courseId comes from the URL, e.g.:
+
+        [HttpGet("{courseId:guid}")]
+        public async Task<ActionResult<bool>> IsEnrolled(Guid courseId)
+
+    Remove the `EnrollmentDto` parameter from the GET action - GET
+    actions shouldn't bind a body.
+
+Step 6 - Rebuild:
+
+    dotnet build
+
+    Every error listed in section 2 must be gone before the app will
+    start.
+
+--------------------------------------------------------------------
+4. SUMMARY (one paragraph)
+--------------------------------------------------------------------
+
+`User` is not defined because `EnrollmentController` does not inherit
+from `ControllerBase`; `User` is a property of `ControllerBase`, and
+the `[ApiController]` attribute does not add it. The fix is to add
+`: ControllerBase` to the class, then parse the `NameIdentifier` claim
+string into a `Guid` (with `Guid.TryParse`), pass that Guid to
+`EnrollmentService.AddAsync` instead of the undefined `studentId`,
+replace the invalid `CreatedResult()` call with `Created()`, and fix
+the `IsEnrolled` action to take a `courseId` from the route and pass
+both required Guid arguments to the service.
+====================================================================

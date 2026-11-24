@@ -8,13 +8,16 @@ public class LessonService
 {
     private readonly LessonRepository _lessonRepository;
     private readonly IVideoStorageService _localVideoStorgeService;
+    private readonly SectionRepository _sectionRepository;
     private readonly UnitOfWork _uow;
 
     public LessonService(LessonRepository lessonRepository,
                         IVideoStorageService localVideoStorgeService,
+                        SectionRepository sectionRepository,
                         UnitOfWork uow)    
     {
         _lessonRepository = lessonRepository;
+        _sectionRepository = sectionRepository;
         _localVideoStorgeService = localVideoStorgeService;
         _uow = uow;
     }
@@ -72,6 +75,21 @@ public class LessonService
         // lesson.VideoKey = videoKey;
 
         await _uow.SaveAsync();
+    }
+
+    public async Task<IEnumerable<LessonDto>> GetByCourseId(Guid courseId)
+    {
+        var sections = await _sectionRepository.GetAll(courseId);
+        var lessons = new List<LessonDto>();
+        foreach (var section in sections)
+        {
+            var lesson = await _lessonRepository.GetAllAsync(section.Id);
+            if (lesson is not null)
+            {                
+            lessons.AddRange(lesson);
+            }
+        }
+        return lessons;
     }
     
 }

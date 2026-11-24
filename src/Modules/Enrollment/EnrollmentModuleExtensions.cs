@@ -13,6 +13,10 @@ public static class EnrollmentModuleExtensions
             o.UseNpgsql(config.GetConnectionString("Default"),
                 s => s.MigrationsHistoryTable("__EFMigrationsHistory", EnrollmentDbContext.Schema)));
 
+        //services.AddDataProtection();
+        services.AddScoped<EnrollmentService>();
+        services.AddScoped<EnrollmentRepository>();
+        services.AddScoped<EnrollmentUnitOfWork>();
         return services;
     }
 }

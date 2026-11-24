@@ -1,4 +1,6 @@
+using ELearning.Enrollment.Domain;
 using ELearning.Enrollment.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 public class EnrollmentRepository
@@ -9,12 +11,12 @@ public class EnrollmentRepository
         _context = context;
     }
 
-    public async Task AddAsync()
+    public async Task AddAsync(Enrollment enrollment)
     {
-        
+        await _context.Enrollments.AddAsync(enrollment);
     }
-    public async Task IsEnrolled()
+    public async Task<bool> IsEnrolled(Guid studentId, Guid courseId)
     {
-        
+       return await _context.Enrollments.AnyAsync(e => e.StudentId == studentId && e.CourseId ==courseId);
     }
 }
