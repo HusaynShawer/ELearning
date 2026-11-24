@@ -22,9 +22,9 @@ public class AuthEndPoint : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<ActionResult> LogIn(string email, string password)
+    public async Task<ActionResult> LogIn([FromBody] LoginDto dto)
     {
-        var login = await _service.LogIn(email, password);
+        var login = await _service.LogIn(dto);
         return Ok(login);
     }
 }

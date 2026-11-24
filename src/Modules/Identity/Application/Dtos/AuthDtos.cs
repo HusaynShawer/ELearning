@@ -29,7 +29,11 @@ public class RegisterResponseDto
 {
     public Guid UserId { get; set; }
 }
-
+public class LoginDto
+{
+    public string email {get;set;}
+    public string password {get;set;}
+}
 public class LoginResponseDto
 {
     public string Token { get; set; } = string.Empty;

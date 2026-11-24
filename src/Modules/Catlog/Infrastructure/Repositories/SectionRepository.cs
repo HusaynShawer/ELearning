@@ -16,23 +16,32 @@ public class SectionRepository
     {
         await _context.Sections.AddAsync(section);
     }
+
     public async Task<IEnumerable<SectionDto>> GetAll(Guid courseId)
     {
-        var sections = await _context.Sections.Where(s =>s.CourseId == courseId).ToListAsync();
+        var sections = await _context.Sections
+            .Include(s => s.Course)
+            .Include(s => s.Lessons)
+            .Where(s => s.CourseId == courseId)
+            .OrderBy(s => s.Order)
+            .ToListAsync();
+
         return sections.Select(s => new SectionDto
         {
             Id = s.Id,
             CourseId = s.CourseId,
             Title = s.Title,
             Order = s.Order,
-            Lessons = s.Lessons.Select(l => new LessonWithSectionDto
-            {
-                Type  = l.Type,
-                ContentUrl = l.ContentUrl,
-                DurationSeconds = l.DurationSeconds,
-                Order = l.Order,
-                IsFreePreview = l.IsFreePreview
-            }).ToList()
+            Lessons = (s.Lessons ?? Enumerable.Empty<Lesson>())
+                .OrderBy(l => l.Order)
+                .Select(l => new LessonWithSectionDto
+                {
+                    Type = l.Type,
+                    DurationSeconds = l.DurationSeconds,
+                    Order = l.Order,
+                    IsFreePreview = l.IsFreePreview
+                })
+                .ToList()
         }).ToList();
     }
 

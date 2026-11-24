@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using ELearning.Catalog.Application.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +16,11 @@ public class Lessoncontroller : ControllerBase
     [HttpPost("")]
     public async Task<ActionResult<LessonDto>> AddLesson(LessonDto lessonDto)
     {
-        var lesson = await _lessonService.Add(lessonDto);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if(!Guid.TryParse(userId,out var ownerId))
+            return Forbid();
+
+        var lesson = await _lessonService.Add(lessonDto,ownerId);
         return Ok(lesson);
     }
     [HttpGet("")]
@@ -31,8 +36,14 @@ public class Lessoncontroller : ControllerBase
         IFormFile video,
         CancellationToken cancellationToken)
     {
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if(!Guid.TryParse(userId,out var ownerId))
+            return Forbid();
+
         await _lessonService.UploadVideoAsync(
             id,
+            ownerId,
             video,
             cancellationToken
         );

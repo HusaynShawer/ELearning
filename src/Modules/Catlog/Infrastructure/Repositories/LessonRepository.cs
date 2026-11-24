@@ -25,7 +25,6 @@ public class LessonRepository
             SectionId = l.SectionId,
             Title = l.Title,
             Type = l.Type,
-            ContentUrl = l.ContentUrl,
             DurationSeconds =l.DurationSeconds,
             Order = l.Order,
             IsFreePreview= l.IsFreePreview

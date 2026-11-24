@@ -1,21 +1,33 @@
 using ELearning.Catalog.Application.Dtos;
 using ELearning.Catalog.Domain;
 using ELearning.Catalog.Infrastructure;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 public class SectionService
 {
     private readonly SectionRepository _sectionRepository;
+    private readonly CourseService _courseService;
+
     private readonly UnitOfWork _uow;
 
     public SectionService(SectionRepository sectionRepository,
+                            CourseService courseService,
                             UnitOfWork uow)
     {
      _sectionRepository = sectionRepository;
+     _courseService = courseService;
      _uow = uow;   
     }
 
-    public async Task AddSection(SectionDto sectionDto)
+    public async Task AddSection(SectionDto sectionDto, Guid ownerId)
     {
+        var course = await _courseService.GetByIdAsync(sectionDto.CourseId);
+        if (course is null)
+            throw new Exception("course not found");
+        
+        if (course.InstructorId != ownerId)
+                throw new Exception("you dont have the right to upload to this course");
+
         var section = new Section
         {
             CourseId = sectionDto.CourseId,

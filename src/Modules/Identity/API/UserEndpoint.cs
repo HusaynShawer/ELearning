@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
 [Route("api/[controller]")]
-[AllowAnonymous]
+[Authorize(Policy = "AdminOnly")]
 public class UserEndpoint : ControllerBase
 {
     private readonly UserService _userService;
@@ -17,7 +17,7 @@ public class UserEndpoint : ControllerBase
     public async Task<IActionResult> GetAllUsers()
     {
         var users = await _userService.GetAllUsers();
-        return Ok(users);
+        return Ok(users.Select(u =>u.FullName));
     }
 
     [HttpGet("users/count")]

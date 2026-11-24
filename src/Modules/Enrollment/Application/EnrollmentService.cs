@@ -44,4 +44,18 @@ public class EnrollmentService
     {
        return await _enrollmentRepository.IsEnrolled(studentId,courseId);
     }
+
+    public async Task<IEnumerable<Guid>> GetCoursesEnrolledIn(Guid studenId)
+    {
+        var enrolls = await _enrollmentRepository.GetAllCourseEnrolled(studenId);
+        var coursesIds = new List<Guid>();
+        foreach(var enroll in enrolls)
+        {
+            if(enroll is null)
+                continue;
+            coursesIds.Add(enroll.CourseId);
+        }
+
+        return coursesIds;
+    }
 }

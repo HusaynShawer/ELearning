@@ -60,14 +60,14 @@ public class AuthService
         };
     }
 
-    public async Task<LoginResponseDto> LogIn(string email, string password)
+    public async Task<LoginResponseDto> LogIn(LoginDto loginDto)
     {
-        var user = await _userManager.FindByEmailAsync(email);
+        var user = await _userManager.FindByEmailAsync(loginDto.email);
 
         if (user is null || !user.IsActive)
             throw new UnauthorizedAccessException("Invalid email or password");
 
-        var isPasswordValid = await _userManager.CheckPasswordAsync(user, password);
+        var isPasswordValid = await _userManager.CheckPasswordAsync(user, loginDto.password);
 
         if (!isPasswordValid)
             throw new UnauthorizedAccessException("Invalid email or password");

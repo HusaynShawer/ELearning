@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http.HttpResults;
-using ELearning.Catalog.Application;
 using ELearning.Catalog.Application.Dtos;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -15,14 +14,18 @@ public class CourseController : ControllerBase
         _courseService = courseService;
     }
 
-    [HttpPost("api/courses")]
+    [HttpPost("")]
     public async Task<ActionResult<CourseResponeDto>> CreateCourse([FromBody] CourseRequestDto dto)
     {
-        var result = await _courseService.CreateAsync(dto);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if(!Guid.TryParse(userId,out var ownerId))
+            return Forbid();
+            
+        var result = await _courseService.CreateAsync(dto, ownerId);
         return CreatedAtAction(nameof(GetCourseById), new { courseId = result.CourseId }, result);
     }
 
-    [HttpGet("api/courses/{courseId}")]
+    [HttpGet("{courseId}")]
     public async Task<ActionResult<CourseResponeDto>> GetCourseById(Guid courseId)
     {
         var result = await _courseService.GetByIdAsync(courseId);

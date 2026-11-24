@@ -13,7 +13,7 @@ public class CourseService
         _uow = uow;
     }
 
-    public async Task<CourseResponeDto> CreateAsync(CourseRequestDto dto)
+    public async Task<CourseResponeDto> CreateAsync(CourseRequestDto dto,Guid ownerId)
     {
         var course = new Course
         {
@@ -26,7 +26,7 @@ public class CourseService
             Level = dto.Level,
             Status = dto.Status,
             CategoryId = dto.CategoryId,
-            InstructorId = dto.InstructorId, // <-- must set this
+            InstructorId = ownerId,
 
             Sections = dto.Sections.Select(s => new Section
             {
@@ -98,7 +98,6 @@ public class CourseService
                     Title           = l.Title,
                     Order           = l.Order,
                     Type            = l.Type,
-                    ContentUrl      = l.ContentUrl,
                     DurationSeconds = l.DurationSeconds,
                 }).ToList()
             }).ToList()
@@ -128,7 +127,6 @@ public class CourseService
                     Title           = l.Title,
                     Order           = l.Order,
                     Type            = l.Type,
-                    ContentUrl      = l.ContentUrl,
                     DurationSeconds = l.DurationSeconds,
                 }).ToList()
             }).ToList()

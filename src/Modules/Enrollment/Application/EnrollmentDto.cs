@@ -14,7 +14,21 @@ public class EnrollmentDto
     // public ICollection<LiveSessionAttendance> Attendances { get; set; } = new List<LiveSessionAttendance>();
 }
 
+public class EnrollmentReponseDto
+{
+    public Guid Id {get;set;}
+    public Guid CourseId { get; set; }
+    public EnrollmentStatus Status {get;set;}
 
+
+}
+public class EnrollmentConfrimDto
+{
+    public Guid Id {get;set;}
+    public EnrollmentStatus Status {get;set;}
+
+
+}
 public class LessonProgressDto
 {
     public Guid EnrollmentId { get; set; }

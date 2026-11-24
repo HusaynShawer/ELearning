@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Buffers;
 
 namespace ELearning.Identity;
 
@@ -64,15 +65,25 @@ public static class IdentityModuleExtensions
 
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(
-                            config["Jwt:SecretKey"]!))
+                            config["Jwt:SecretKey"]!)),
+                    
+                    NameClaimType = "name",
+                    RoleClaimType = "role"
                 };
         });
 
-        services.AddAuthorization();
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AdminOnly",p =>p.RequireRole(Roles.Admin));
+            options.AddPolicy("InstructorOrAdmin",p =>p.RequireRole(Roles.Instructor,Roles.Admin));
+            options.AddPolicy("StudentOnly",p =>p.RequireRole(Roles.Student));
+
+        });
 
         services.AddScoped<AuthService>();
         services.AddScoped<TokenService>();
         services.AddScoped<UserService>();
+        services.AddScoped<LeariningService>();
         // repositories
         services.AddScoped<UserRepository>();
 
