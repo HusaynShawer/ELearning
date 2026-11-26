@@ -13,7 +13,7 @@ public class CourseController : ControllerBase
     {
         _courseService = courseService;
     }
-
+    [Authorize(Policy = "InstructorOrAdmin")]
     [HttpPost("")]
     public async Task<ActionResult<CourseResponeDto>> CreateCourse([FromBody] CourseRequestDto dto)
     {

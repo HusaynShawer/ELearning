@@ -36,7 +36,7 @@ public class TokenService
         // 3. Add roles to JWT claims
         foreach (var role in roles)
         {
-            claims.Add(new Claim(ClaimTypes.Role, role));
+            claims.Add(new Claim("role", role));
         }
 
         // 4. Create signing key

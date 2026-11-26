@@ -13,7 +13,9 @@ public class Lessoncontroller : ControllerBase
     {
         _lessonService = lessonService;
     }
+    
     [HttpPost("")]
+    [Authorize(Policy = "InstructorOrAdmin")]
     public async Task<ActionResult<LessonDto>> AddLesson(LessonDto lessonDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -31,6 +33,8 @@ public class Lessoncontroller : ControllerBase
     }
     [HttpPost("{id}/video")]
     [Consumes("multipart/form-data")]
+    [Authorize(Policy = "InstructorOrAdmin")]
+
     public async Task<IActionResult> UploadVideo(
         Guid id,
         IFormFile video,

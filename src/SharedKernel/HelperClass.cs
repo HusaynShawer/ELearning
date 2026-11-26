@@ -10,7 +10,9 @@ public class Helper
 
     public async Task<bool> IsOwner(Guid courseId, Guid ownerId)
     {
-        var isOwner = await _courseService.GetByIdAsync(courseId);
-        return isOwner is not null;
+        var course = await _courseService.GetByIdAsync(courseId);
+        if(course is null || course.InstructorId != ownerId)
+            return false;
+        return true;
     }
 }

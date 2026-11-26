@@ -20,7 +20,9 @@ public class SectionController :ControllerBase
         var courses = await _sectionService.GetAll(courseId);
         return Ok(courses);
     }
+    
     [HttpPost("")]
+    [Authorize(Policy = "InstructorOrAdmin")]
     public async Task<ActionResult> AddSection(SectionDto sectionDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

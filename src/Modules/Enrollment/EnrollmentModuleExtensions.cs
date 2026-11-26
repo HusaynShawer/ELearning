@@ -1,4 +1,5 @@
 using ELearning.Enrollment.Infrastructure;
+using ELearning.SharedKernel;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,11 @@ public static class EnrollmentModuleExtensions
 
         //services.AddDataProtection();
         services.AddScoped<EnrollmentService>();
+        services.AddScoped<InstructorService>();
+        services.AddScoped<Helper>();
+
+        // Repositories
+        services.AddScoped<InstructorRepository>();
         services.AddScoped<EnrollmentRepository>();
         services.AddScoped<EnrollmentUnitOfWork>();
         return services;

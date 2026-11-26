@@ -21,4 +21,10 @@ public class InstructorRepository
         _enrollmentDbContext.Enrollments.Update(enrollment);
         await _enrollmentDbContext.SaveChangesAsync();
     }
+
+    public async Task<IEnumerable<Enrollment>> GetBindingAllEnrolls(Guid courseId)
+    {
+        var enrollments =  await _enrollmentDbContext.Enrollments.Where(e =>e.CourseId ==courseId && e.Status == EnrollmentStatus.Active).ToListAsync();
+        return enrollments;
+    }
 }

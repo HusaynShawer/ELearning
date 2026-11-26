@@ -29,4 +29,9 @@ public class EnrollmentRepository
         var enrollment =  await _context.Enrollments.FindAsync(enrollmentId);
         return enrollment;
     }
+    public async Task<IEnumerable<Enrollment>> GetByCourseIdAsync(Guid courseId)
+    {
+        var enrollment =  await _context.Enrollments.Where(e =>e.CourseId == courseId).ToListAsync();
+        return enrollment;
+    }
 }
