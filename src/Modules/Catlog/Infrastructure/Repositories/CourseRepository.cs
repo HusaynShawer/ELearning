@@ -2,6 +2,8 @@ using ELearning.Catalog.Domain;
 using ELearning.Catalog.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
+namespace ELearning.Catalog.Infrastructure;
+
 public class CourseRepository
 {
     private readonly CatalogDbContext _context;
@@ -32,7 +34,7 @@ public class CourseRepository
             .FirstOrDefaultAsync(c => c.Id == courseId);
     }
 
-    public async Task<IEnumerable<Course>> GetCoursesByInstructor(Guid instructorId)
+    public async Task<IEnumerable<Course>> GetCoursesByInstructorAsync(Guid instructorId)
     {
         return await _context.Courses
             .AsNoTracking()
@@ -40,7 +42,7 @@ public class CourseRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Course>> GetCoursesByCategory(Guid categoryId)
+    public async Task<IEnumerable<Course>> GetCoursesByCategoryAsync(Guid categoryId)
     {
         return await _context.Courses
             .AsNoTracking()

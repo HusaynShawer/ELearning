@@ -1,3 +1,4 @@
+using ELearning.Catalog.Application;
 using ELearning.Catalog.Domain;
 namespace ELearning.SharedKernel;
 public class Helper

@@ -1,4 +1,3 @@
-
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -6,6 +5,8 @@ using ELearning.Identity.Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+
+namespace ELearning.Identity.Application.Service;
 
 public class TokenService
 {
@@ -20,7 +21,7 @@ public class TokenService
         _userManager = userManager;
     }
 
-    public async Task<string> GenerateToken(ApplicationUser user)
+    public async Task<string> GenerateTokenAsync(ApplicationUser user)
     {
         // 1. Create basic user claims
         var claims = new List<Claim>

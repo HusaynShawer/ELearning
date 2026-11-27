@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using ELearning.Catalog.Application;
 using ELearning.Catalog.Application.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class SectionController :ControllerBase
+public class SectionController : ControllerBase
 {
     private readonly SectionService _sectionService;
     public SectionController(SectionService sectionService)
@@ -16,11 +17,10 @@ public class SectionController :ControllerBase
     [HttpGet("")]
     public async Task<ActionResult<IEnumerable<SectionDto>>> GetAll(Guid courseId)
     {
-        
-        var courses = await _sectionService.GetAll(courseId);
+        var courses = await _sectionService.GetAllAsync(courseId);
         return Ok(courses);
     }
-    
+
     [HttpPost("")]
     [Authorize(Policy = "InstructorOrAdmin")]
     public async Task<ActionResult> AddSection(SectionDto sectionDto)
@@ -29,7 +29,7 @@ public class SectionController :ControllerBase
         if(!Guid.TryParse(userId,out var ownerId))
             return Forbid();
 
-        await _sectionService.AddSection(sectionDto,ownerId);
+        await _sectionService.AddSectionAsync(sectionDto, ownerId);
         return Ok();
     }
 }

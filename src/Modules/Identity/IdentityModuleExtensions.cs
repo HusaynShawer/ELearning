@@ -1,3 +1,5 @@
+using ELearning.Catalog.Application;
+using ELearning.Identity.Application.Service;
 using ELearning.Identity.Domain;
 using ELearning.Identity.Infrastructure;
 using Microsoft.AspNetCore.Identity;
@@ -84,7 +86,7 @@ public static class IdentityModuleExtensions
         services.AddScoped<AuthService>();
         services.AddScoped<TokenService>();
         services.AddScoped<UserService>();
-        services.AddScoped<LeariningService>();
+        services.AddScoped<LearningService>();
         // repositories
         services.AddScoped<UserRepository>();
 

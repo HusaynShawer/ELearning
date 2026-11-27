@@ -1,34 +1,35 @@
 using ELearning.Catalog.Application.Dtos;
 using ELearning.Catalog.Domain;
+using ELearning.Catalog.Infrastructure;
 
 namespace ELearning.Catalog.Application.Service;
 
-public class categoryService
+public class CategoryService
 {
     private readonly CategoryRepository _categoryRepository;
 
-    public categoryService(CategoryRepository categoryRepository)
+    public CategoryService(CategoryRepository categoryRepository)
     {
         _categoryRepository = categoryRepository;
     }
 
     public async Task<IEnumerable<CategoryResponseDto>> GetAllCategoriesAsync()
     {
-        var categories =  await _categoryRepository.GetAllCategoriesAsync();
+        var categories = await _categoryRepository.GetAllCategoriesAsync();
         return categories.Select(cat => new CategoryResponseDto
         {
             Id = cat.Id,
             Name = cat.Name,
-            slug = cat.Slug
+            Slug = cat.Slug
         });
     }
 
-    public async Task CreateCategory(CategoryDto cat)
+    public async Task CreateCategoryAsync(CategoryDto cat)
     {
         var category = new Category
         {
             Name = cat.Name,
-            Slug = cat.slug
+            Slug = cat.Slug
         };
         await _categoryRepository.AddCategoryAsync(category);
     }

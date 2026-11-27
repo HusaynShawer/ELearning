@@ -1,14 +1,16 @@
+using ELearning.Catalog.Infrastructure;
+using ELearning.SharedKernel.Application.Exceptions;
 
 namespace ELearning.Catalog.Application;
 
-public class LocalVideoStorgeService : IVideoStorageService
+public class LocalVideoStorageService : IVideoStorageService
 {
     private readonly string _storagePath;
     private readonly SectionService _sectionService;
     private readonly CourseService _courseService;
     private readonly LessonRepository _lessonRepository;
 
-    public LocalVideoStorgeService(
+    public LocalVideoStorageService(
         IWebHostEnvironment environment,
         SectionService sectionService,
         CourseService courseService,
@@ -33,16 +35,16 @@ public class LocalVideoStorgeService : IVideoStorageService
         CancellationToken cancellationToken = default)
     {
         if (video == null || video.Length == 0)
-            throw new ArgumentException("Invalid video file.");
+            throw new ValidationException("Invalid video file.");
 
         var extension = Path.GetExtension(video.FileName).ToLowerInvariant();
 
         var allowedExtensions = new[] { ".mp4", ".webm", ".mov" };
 
         if (!allowedExtensions.Contains(extension))
-            throw new ArgumentException("Unsupported video format.");
+            throw new ValidationException("Unsupported video format.");
 
-        var relativePath = await LessonSavePath(lessonId);
+        var relativePath = await GetLessonSavePathAsync(lessonId);
 
         var directoryPath = Path.Combine(_storagePath, relativePath);
 
@@ -79,7 +81,7 @@ public class LocalVideoStorgeService : IVideoStorageService
             + Path.DirectorySeparatorChar;
 
         if (!filePath.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase))
-            throw new ArgumentException("Invalid video key.");
+            throw new ValidationException("Invalid video key.");
 
         if (File.Exists(filePath))
             File.Delete(filePath);
@@ -87,22 +89,22 @@ public class LocalVideoStorgeService : IVideoStorageService
         await Task.CompletedTask;
     }
 
-    public async Task<string> LessonSavePath(Guid lessonId)
+    public async Task<string> GetLessonSavePathAsync(Guid lessonId)
     {
         var lesson = await _lessonRepository.GetByIdAsync(lessonId);
 
         if (lesson == null)
-            throw new Exception("Lesson not found.");
+            throw new NotFoundException("Lesson not found.");
 
-        var section = await _sectionService.GetById(lesson.SectionId);
+        var section = await _sectionService.GetByIdAsync(lesson.SectionId);
 
         if (section == null)
-            throw new Exception("Section not found.");
+            throw new NotFoundException("Section not found.");
 
         var course = await _courseService.GetByIdAsync(section.CourseId);
 
         if (course == null)
-            throw new Exception("Course not found.");
+            throw new NotFoundException("Course not found.");
 
         return Path.Combine(
             MakeSafeFolderName(course.Title),

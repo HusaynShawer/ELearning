@@ -1,12 +1,14 @@
 using ELearning.Catalog.Application.Dtos;
 using ELearning.Catalog.Domain;
-using ELearning.Catalog.Infrastructure;
-using Microsoft.AspNetCore.Http.HttpResults;
+using ELearning.SharedKernel.Application.Exceptions;
 using Microsoft.EntityFrameworkCore;
+
+namespace ELearning.Catalog.Infrastructure;
 
 public class LessonRepository
 {
     private readonly CatalogDbContext _context;
+
     public LessonRepository(CatalogDbContext context)
     {
         _context = context;
@@ -16,23 +18,25 @@ public class LessonRepository
     {
         await _context.Lessons.AddAsync(lesson);
     }
+
     public async Task<IEnumerable<LessonDto>> GetAllAsync(Guid sectionId)
     {
-        var lessons = await _context.Lessons.Where(l =>l.SectionId ==sectionId).ToListAsync();
+        var lessons = await _context.Lessons.Where(l => l.SectionId == sectionId).ToListAsync();
         var lessonsDto = lessons.Select(l => new LessonDto
         {
             Id = l.Id,
             SectionId = l.SectionId,
             Title = l.Title,
             Type = l.Type,
-            DurationSeconds =l.DurationSeconds,
+            DurationSeconds = l.DurationSeconds,
             Order = l.Order,
-            IsFreePreview= l.IsFreePreview
+            IsFreePreview = l.IsFreePreview
         }).ToList();
-        return lessonsDto.Any() ? lessonsDto : throw new Exception("no lessons with this section");
+        return lessonsDto.Any() ? lessonsDto : throw new NotFoundException("No lessons found for this section.");
     }
-    public async Task<Lesson?> GetByIdAsync(Guid Id)
+
+    public async Task<Lesson?> GetByIdAsync(Guid lessonId)
     {
-        return await _context.Lessons.FindAsync(Id);
+        return await _context.Lessons.FindAsync(lessonId);
     }
 }

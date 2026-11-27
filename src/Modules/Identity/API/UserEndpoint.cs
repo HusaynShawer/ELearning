@@ -1,3 +1,4 @@
+using ELearning.Identity.Application.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,14 +17,14 @@ public class UserEndpoint : ControllerBase
     [HttpGet("users")]
     public async Task<IActionResult> GetAllUsers()
     {
-        var users = await _userService.GetAllUsers();
-        return Ok(users.Select(u =>u.FullName));
+        var users = await _userService.GetAllUsersAsync();
+        return Ok(users.Select(u => u.FullName));
     }
 
     [HttpGet("users/count")]
     public async Task<IActionResult> GetUserCount()
     {
-        var count = await _userService.GetUserCount();
+        var count = await _userService.GetUserCountAsync();
         return Ok(count);
     }
 }

@@ -16,7 +16,7 @@ public class CourseRequestDto
 
 }
 
-public class CourseResponeDto
+public class CourseResponseDto
 {
     public Guid CourseId {get; set;}
     public string Title {get;set;}

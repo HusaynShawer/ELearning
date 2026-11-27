@@ -19,11 +19,11 @@ public static class CatalogModuleExtensions
         services.AddScoped<LessonRepository>();
 //      services
         services.AddScoped<CourseService>();
-        services.AddScoped<categoryService>();
+        services.AddScoped<CategoryService>();
         services.AddScoped<SectionService>();
         services.AddScoped<LessonService>();
         services.AddScoped<UnitOfWork>();
-        services.AddScoped<IVideoStorageService , LocalVideoStorgeService>();
+        services.AddScoped<IVideoStorageService , LocalVideoStorageService>();
         return services;
     }
 }

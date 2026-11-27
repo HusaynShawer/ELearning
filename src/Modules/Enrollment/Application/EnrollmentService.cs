@@ -1,13 +1,16 @@
-using ELearning.Catalog.Infrastructure;
-using ELearning.Enrollment.Application;
+using ELearning.Catalog.Application;
 using ELearning.Enrollment.Domain;
+using EnrollmentEntity = ELearning.Enrollment.Domain.Enrollment;
 using ELearning.Enrollment.Infrastructure;
+
+namespace ELearning.Enrollment.Application;
 
 public class EnrollmentService
 {
     private readonly EnrollmentRepository _enrollmentRepository;
     private readonly LessonService _lessonService;
     private readonly EnrollmentUnitOfWork _uow;
+
     public EnrollmentService(EnrollmentRepository enrollmentRepository,
                             LessonService lessonService,
                             EnrollmentUnitOfWork uow)
@@ -19,8 +22,8 @@ public class EnrollmentService
 
     public async Task AddAsync(EnrollmentDto enrollmentDto, Guid studentId)
     {
-        var lessons = await _lessonService.GetByCourseId(enrollmentDto.CourseId);
-        var enrollment = new Enrollment
+        var lessons = await _lessonService.GetByCourseIdAsync(enrollmentDto.CourseId);
+        var enrollment = new EnrollmentEntity
         {
             StudentId = studentId,
             CourseId = enrollmentDto.CourseId,
@@ -29,29 +32,28 @@ public class EnrollmentService
             LessonProgresses = lessons.Select(l => new LessonProgress
             {
                 LessonId = l.Id,
-                IsCompleted =false,
+                IsCompleted = false,
                 LastPositionSeconds = 0,
                 CompletedAtUtc = null
             }).ToList(),
-            
         };
 
         await _enrollmentRepository.AddAsync(enrollment);
         await _uow.SaveAsync();
-
-    }
-    public async Task<bool> IsEnrolled(Guid studentId, Guid courseId)
-    {
-       return await _enrollmentRepository.IsEnrolled(studentId,courseId);
     }
 
-    public async Task<IEnumerable<Guid>> GetCoursesEnrolledIn(Guid studenId)
+    public async Task<bool> IsEnrolledAsync(Guid studentId, Guid courseId)
     {
-        var enrolls = await _enrollmentRepository.GetAllCourseEnrolled(studenId);
+        return await _enrollmentRepository.IsEnrolledAsync(studentId, courseId);
+    }
+
+    public async Task<IEnumerable<Guid>> GetCoursesEnrolledInAsync(Guid studentId)
+    {
+        var enrolls = await _enrollmentRepository.GetAllCoursesEnrolledAsync(studentId);
         var coursesIds = new List<Guid>();
-        foreach(var enroll in enrolls)
+        foreach (var enroll in enrolls)
         {
-            if(enroll is null)
+            if (enroll is null)
                 continue;
             coursesIds.Add(enroll.CourseId);
         }

@@ -35,7 +35,7 @@ public class EnrollmentController :ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userId, out var studentId))
             return Unauthorized(); 
-        await _enrollmentService.IsEnrolled(enrollmentDto.CourseId ,studentId);
+        await _enrollmentService.IsEnrolledAsync(enrollmentDto.CourseId, studentId);
         return Ok();
     }
 }

@@ -1,3 +1,4 @@
+using ELearning.Enrollment.Application;
 using ELearning.Enrollment.Infrastructure;
 using ELearning.SharedKernel;
 using Microsoft.EntityFrameworkCore;

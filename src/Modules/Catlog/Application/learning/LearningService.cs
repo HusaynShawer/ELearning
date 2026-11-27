@@ -1,14 +1,19 @@
 using ELearning.Catalog.Application.Dtos;
 using ELearning.Catalog.Domain;
 using ELearning.Catalog.Infrastructure;
+using ELearning.Enrollment.Application;
+using ELearning.SharedKernel.Application.Exceptions;
 
-public class LeariningService
+namespace ELearning.Catalog.Application;
+
+public class LearningService
 {
     private readonly CourseRepository _courseRepo;
     private readonly EnrollmentService _enrollmentService;
 
     private readonly UnitOfWork _uow;
-    public LeariningService(CourseRepository courseRepository,
+
+    public LearningService(CourseRepository courseRepository,
                             EnrollmentService enrollmentService,
                             UnitOfWork uow)
     {
@@ -17,21 +22,21 @@ public class LeariningService
         _uow = uow;
     }
 
-    public async Task<CourseResponeDto> GetByIdAsync(Guid courseId)
+    public async Task<CourseResponseDto> GetByIdAsync(Guid courseId)
     {
         var course = await _courseRepo.GetCourseByIdAsync(courseId);
         if (course == null)
-            throw new Exception("Course not found");
+            throw new NotFoundException("Course not found.");
 
-        return new CourseResponeDto
+        return new CourseResponseDto
         {
-            CourseId     = course.Id,
-            Title        = course.Title,
-            Description  = course.Description,
+            CourseId = course.Id,
+            Title = course.Title,
+            Description = course.Description,
             ThumbnailUrl = course.ThumbnailUrl,
-            Price        = course.Price,
-            Level        = course.Level,
-            CategoryId   = course.CategoryId,
+            Price = course.Price,
+            Level = course.Level,
+            CategoryId = course.CategoryId,
             InstructorId = course.InstructorId,
 
             Sections = course.Sections.Select(s => new SectionWithCourseDto
@@ -40,21 +45,21 @@ public class LeariningService
                 Order = s.Order,
                 Lessons = s.Lessons.Select(l => new LessonWithSectionDto
                 {
-                    Title           = l.Title,
-                    Order           = l.Order,
-                    Type            = l.Type,
-                    ContentUrl      = l.ContentUrl,
+                    Title = l.Title,
+                    Order = l.Order,
+                    Type = l.Type,
+                    ContentUrl = l.ContentUrl,
                     DurationSeconds = l.DurationSeconds,
                 }).ToList()
             }).ToList()
         };
     }
 
-    public async Task<IEnumerable<CourseResponeDto>> GetAllCourseEnrolledIn(Guid studentId)
+    public async Task<IEnumerable<CourseResponseDto>> GetAllCoursesEnrolledInAsync(Guid studentId)
     {
-        var coursesIds = await _enrollmentService.GetCoursesEnrolledIn(studentId);
+        var coursesIds = await _enrollmentService.GetCoursesEnrolledInAsync(studentId);
         var courses = new List<Course>();
-        foreach(var courseId in coursesIds)
+        foreach (var courseId in coursesIds)
         {
             var course = await _courseRepo.GetCourseByIdAsync(courseId);
             if (course is null)
@@ -62,15 +67,15 @@ public class LeariningService
             courses.Add(course);
         }
 
-                return courses.Select(course => new CourseResponeDto
+        return courses.Select(course => new CourseResponseDto
         {
-            CourseId     = course.Id,
-            Title        = course.Title,
-            Description  = course.Description,
+            CourseId = course.Id,
+            Title = course.Title,
+            Description = course.Description,
             ThumbnailUrl = course.ThumbnailUrl,
-            Price        = course.Price,
-            Level        = course.Level,
-            CategoryId   = course.CategoryId,
+            Price = course.Price,
+            Level = course.Level,
+            CategoryId = course.CategoryId,
             InstructorId = course.InstructorId,
 
             Sections = course.Sections.Select(s => new SectionWithCourseDto
@@ -79,10 +84,10 @@ public class LeariningService
                 Order = s.Order,
                 Lessons = s.Lessons.Select(l => new LessonWithSectionDto
                 {
-                    Title           = l.Title,
-                    Order           = l.Order,
-                    ContentUrl      = l.ContentUrl,
-                    Type            = l.Type,
+                    Title = l.Title,
+                    Order = l.Order,
+                    ContentUrl = l.ContentUrl,
+                    Type = l.Type,
                     DurationSeconds = l.DurationSeconds,
                 }).ToList()
             }).ToList()

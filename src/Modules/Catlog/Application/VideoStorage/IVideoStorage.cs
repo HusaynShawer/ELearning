@@ -3,7 +3,7 @@ public interface IVideoStorageService
 {
     Task<string> UploadAsync(
         IFormFile video,
-        Guid lessionId,
+        Guid lessonId,
         CancellationToken cancellationToken = default
     );
 

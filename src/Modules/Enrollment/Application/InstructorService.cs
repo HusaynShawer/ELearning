@@ -1,13 +1,16 @@
-using ELearning.Catalog.Domain;
-using ELearning.Enrollment.Application;
-using ELearning.Enrollment.Domain;
+using ELearning.Catalog.Infrastructure;
+using EnrollmentEntity = ELearning.Enrollment.Domain.Enrollment;
+using ELearning.Enrollment.Infrastructure;
 using ELearning.SharedKernel;
+using ELearning.SharedKernel.Application.Exceptions;
+
+namespace ELearning.Enrollment.Application;
+
 public class InstructorService
 {
     private readonly InstructorRepository _instructorRepository;
     private readonly EnrollmentRepository _enrollmentRepository;
     private readonly CourseRepository _courseRepository;
-
 
     private readonly Helper _helper;
 
@@ -21,36 +24,34 @@ public class InstructorService
         _courseRepository = courseRepository;
     }
 
-    public async Task<IEnumerable<EnrollmentReponseDto>> GetBindigEnrollments(Guid courseId, Guid instructorId)
+    public async Task<IEnumerable<EnrollmentResponseDto>> GetBindingEnrollmentsAsync(Guid courseId, Guid instructorId)
     {
-        var isOwner = await _helper.IsOwner(courseId,instructorId);
+        var isOwner = await _helper.IsOwner(courseId, instructorId);
         if (isOwner)
         {
-            var enrollments = await _instructorRepository.GetBindingEnrolls(courseId);
+            var enrollments = await _instructorRepository.GetBindingEnrollmentsAsync(courseId);
             if (enrollments.Any() || enrollments is not null)
             {
-                return enrollments.Select(e => new EnrollmentReponseDto
+                return enrollments.Select(e => new EnrollmentResponseDto
                 {
                     Id = e.Id,
                     CourseId = e.CourseId,
                     Status = e.Status
                 });
             }
-            throw new Exception("only owner can see binding enrollments");
-
+            throw new NotFoundException("No enrollments found for this course.");
         }
-        throw new Exception("only owner can see binding enrollments");
+        throw new ForbiddenException("Only the course owner can view enrollment requests.");
     }
 
-
-    public async Task<IEnumerable<EnrollmentReponseDto>> GetBindingAllEnrollments(Guid instructorId)
+    public async Task<IEnumerable<EnrollmentResponseDto>> GetBindingAllEnrollmentsAsync(Guid instructorId)
     {
-        var courses = await _courseRepository.GetCoursesByInstructor(instructorId);
+        var courses = await _courseRepository.GetCoursesByInstructorAsync(instructorId);
         var coursesIds = new List<Guid>();
-        
-        if(courses is null || !courses.Any())
+
+        if (courses is null || !courses.Any())
         {
-            throw new Exception("no course for you");
+            throw new NotFoundException("No courses found for this instructor.");
         }
 
         foreach (var item in courses)
@@ -61,43 +62,43 @@ public class InstructorService
                 continue;
         }
 
-        var instructorEnrollments = new List<Enrollment>();
-        foreach(Guid Id in coursesIds)
+        var instructorEnrollments = new List<EnrollmentEntity>();
+        foreach (Guid Id in coursesIds)
         {
             var allEnrollment = await _enrollmentRepository.GetByCourseIdAsync(Id);
             if (allEnrollment is null || !allEnrollment.Any())
             {
-                throw new Exception("no enrollments for you");
+                throw new NotFoundException("No enrollments found for this instructor.");
             }
-            foreach(var item in allEnrollment)
+            foreach (var item in allEnrollment)
             {
-                if(item is null)
+                if (item is null)
                     continue;
                 instructorEnrollments.Add(item);
-                    
-            }   
+            }
         }
-        return instructorEnrollments.Select(ie =>new EnrollmentReponseDto
+        return instructorEnrollments.Select(ie => new EnrollmentResponseDto
         {
             Id = ie.Id,
             CourseId = ie.CourseId,
             Status = ie.Status
         });
-
     }
 
-    public async Task EnrollmentConfirm(EnrollmentConfrimDto enrollmentConfrimDto, Guid ownerId)
+    public async Task ConfirmEnrollmentAsync(EnrollmentConfirmDto enrollmentConfirmDto, Guid ownerId)
     {
-        var enrollment = await _enrollmentRepository.getByIdAsync(enrollmentConfrimDto.Id);
+        var enrollment = await _enrollmentRepository.GetByIdAsync(enrollmentConfirmDto.Id);
         if (enrollment is null)
-            throw new Exception("no enrollent with this id");
-        var isOwner = await _helper.IsOwner(enrollment.CourseId,ownerId);
+            throw new NotFoundException("Enrollment not found.");
+
+        var isOwner = await _helper.IsOwner(enrollment.CourseId, ownerId);
         if (!isOwner)
-            throw new Exception("you have no right to confirm");
-        
-        if(enrollment is null)
-            throw new Exception("no enrollment");
-        enrollment.Status = enrollmentConfrimDto.Status;
-        await _instructorRepository.EditEnrollStauts(enrollment);
+            throw new ForbiddenException("You do not have permission to confirm this enrollment.");
+
+        if (enrollment is null)
+            throw new NotFoundException("Enrollment not found.");
+
+        enrollment.Status = enrollmentConfirmDto.Status;
+        await _instructorRepository.UpdateEnrollmentStatusAsync(enrollment);
     }
 }

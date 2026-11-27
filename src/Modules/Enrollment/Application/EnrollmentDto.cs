@@ -14,7 +14,7 @@ public class EnrollmentDto
     // public ICollection<LiveSessionAttendance> Attendances { get; set; } = new List<LiveSessionAttendance>();
 }
 
-public class EnrollmentReponseDto
+public class EnrollmentResponseDto
 {
     public Guid Id {get;set;}
     public Guid CourseId { get; set; }
@@ -22,7 +22,7 @@ public class EnrollmentReponseDto
 
 
 }
-public class EnrollmentConfrimDto
+public class EnrollmentConfirmDto
 {
     public Guid Id {get;set;}
     public EnrollmentStatus Status {get;set;}

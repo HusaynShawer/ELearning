@@ -1,7 +1,9 @@
-
 using ELearning.Identity.Auth;
 using ELearning.Identity.Domain;
+using ELearning.SharedKernel.Application.Exceptions;
 using Microsoft.AspNetCore.Identity;
+
+namespace ELearning.Identity.Application.Service;
 
 public class AuthService
 {
@@ -16,17 +18,17 @@ public class AuthService
         _tokenService = tokenService;
     }
 
-    public async Task<RegisterResponseDto> Register(RegisterRequestDto request)
+    public async Task<RegisterResponseDto> RegisterAsync(RegisterRequestDto request)
     {
         var existedUser = await _userManager.FindByEmailAsync(request.Email);
 
         if (existedUser is not null)
-            throw new InvalidOperationException("Email already exists");
+            throw new ConflictException("Email already exists.");
 
         var existedUserName = await _userManager.FindByNameAsync(request.UserName);
 
         if (existedUserName is not null)
-            throw new InvalidOperationException("Username already exists");
+            throw new ConflictException("Username already exists.");
 
         // Create user
         var user = new ApplicationUser
@@ -43,7 +45,7 @@ public class AuthService
         if (!result.Succeeded)
         {
             var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            throw new InvalidOperationException(errors);
+            throw new ValidationException(errors);
         }
 
         var roleResult = await _userManager.AddToRoleAsync(user, Roles.Student);
@@ -51,7 +53,7 @@ public class AuthService
         if (!roleResult.Succeeded)
         {
             var errors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
-            throw new InvalidOperationException(errors);
+            throw new ValidationException(errors);
         }
 
         return new RegisterResponseDto
@@ -60,19 +62,19 @@ public class AuthService
         };
     }
 
-    public async Task<LoginResponseDto> LogIn(LoginDto loginDto)
+    public async Task<LoginResponseDto> LoginAsync(LoginDto loginDto)
     {
         var user = await _userManager.FindByEmailAsync(loginDto.email);
 
         if (user is null || !user.IsActive)
-            throw new UnauthorizedAccessException("Invalid email or password");
+            throw new UnauthorizedException("Invalid email or password.");
 
         var isPasswordValid = await _userManager.CheckPasswordAsync(user, loginDto.password);
 
         if (!isPasswordValid)
-            throw new UnauthorizedAccessException("Invalid email or password");
+            throw new UnauthorizedException("Invalid email or password.");
 
-        var token = await _tokenService.GenerateToken(user);
+        var token = await _tokenService.GenerateTokenAsync(user);
 
         return new LoginResponseDto
         {

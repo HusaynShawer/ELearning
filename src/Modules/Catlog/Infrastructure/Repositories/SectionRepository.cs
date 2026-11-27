@@ -1,12 +1,13 @@
 using ELearning.Catalog.Application.Dtos;
 using ELearning.Catalog.Domain;
-using ELearning.Catalog.Infrastructure;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
+namespace ELearning.Catalog.Infrastructure;
 
 public class SectionRepository
 {
     private readonly CatalogDbContext _context;
+
     public SectionRepository(CatalogDbContext context)
     {
         _context = context;
@@ -17,7 +18,7 @@ public class SectionRepository
         await _context.Sections.AddAsync(section);
     }
 
-    public async Task<IEnumerable<SectionDto>> GetAll(Guid courseId)
+    public async Task<IEnumerable<SectionDto>> GetAllAsync(Guid courseId)
     {
         var sections = await _context.Sections
             .Include(s => s.Course)
@@ -45,7 +46,7 @@ public class SectionRepository
         }).ToList();
     }
 
-    public async Task<Section?> GetById(Guid sectionId)
+    public async Task<Section?> GetByIdAsync(Guid sectionId)
     {
         return await _context.Sections.FindAsync(sectionId);
     }

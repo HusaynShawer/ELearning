@@ -1,7 +1,9 @@
 using ELearning.Catalog.Application.Dtos;
 using ELearning.Catalog.Domain;
 using ELearning.Catalog.Infrastructure;
-using Microsoft.AspNetCore.Http.HttpResults;
+using ELearning.SharedKernel.Application.Exceptions;
+
+namespace ELearning.Catalog.Application;
 
 public class SectionService
 {
@@ -14,19 +16,19 @@ public class SectionService
                             CourseService courseService,
                             UnitOfWork uow)
     {
-     _sectionRepository = sectionRepository;
-     _courseService = courseService;
-     _uow = uow;   
+        _sectionRepository = sectionRepository;
+        _courseService = courseService;
+        _uow = uow;
     }
 
-    public async Task AddSection(SectionDto sectionDto, Guid ownerId)
+    public async Task AddSectionAsync(SectionDto sectionDto, Guid ownerId)
     {
         var course = await _courseService.GetByIdAsync(sectionDto.CourseId);
         if (course is null)
-            throw new Exception("course not found");
-        
+            throw new NotFoundException("Course not found.");
+
         if (course.InstructorId != ownerId)
-                throw new Exception("you dont have the right to upload to this course");
+            throw new ForbiddenException("You do not have permission to add a section to this course.");
 
         var section = new Section
         {
@@ -46,21 +48,20 @@ public class SectionService
 
         await _sectionRepository.AddAsync(section);
         await _uow.SaveAsync();
-
     }
 
-    public async Task<IEnumerable<SectionDto>> GetAll(Guid courseId)
+    public async Task<IEnumerable<SectionDto>> GetAllAsync(Guid courseId)
     {
-        var sections = await _sectionRepository.GetAll(courseId);
-        return sections.Any() ? sections : throw new Exception("no section in this course");
+        var sections = await _sectionRepository.GetAllAsync(courseId);
+        return sections.Any() ? sections : throw new NotFoundException("No sections found for this course.");
     }
 
-    public async Task<Section> GetById(Guid sectionId)
+    public async Task<Section> GetByIdAsync(Guid sectionId)
     {
-        var section =  await _sectionRepository.GetById(sectionId);
+        var section = await _sectionRepository.GetByIdAsync(sectionId);
         if (section is null)
         {
-            throw new Exception("no section found");
+            throw new NotFoundException("Section not found.");
         }
         return section;
     }

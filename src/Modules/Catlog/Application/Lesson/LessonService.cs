@@ -1,38 +1,38 @@
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using ELearning.Catalog.Application;
 using ELearning.Catalog.Application.Dtos;
 using ELearning.Catalog.Domain;
 using ELearning.Catalog.Infrastructure;
+using ELearning.SharedKernel.Application.Exceptions;
+
+namespace ELearning.Catalog.Application;
 
 public class LessonService
 {
     private readonly LessonRepository _lessonRepository;
-    private readonly IVideoStorageService _localVideoStorgeService;
+    private readonly IVideoStorageService _localVideoStorageService;
     private readonly SectionRepository _sectionRepository;
     private readonly CourseRepository _courseRepository;
 
     private readonly UnitOfWork _uow;
 
     public LessonService(LessonRepository lessonRepository,
-                        IVideoStorageService localVideoStorgeService,
+                        IVideoStorageService localVideoStorageService,
                         SectionRepository sectionRepository,
                         CourseRepository courseRepository,
-                        UnitOfWork uow)    
+                        UnitOfWork uow)
     {
         _lessonRepository = lessonRepository;
         _sectionRepository = sectionRepository;
         _courseRepository = courseRepository;
-        _localVideoStorgeService = localVideoStorgeService;
+        _localVideoStorageService = localVideoStorageService;
         _uow = uow;
     }
 
-    public async Task<LessonDto> Add(LessonDto lessonDto,Guid ownerId)
+    public async Task<LessonDto> AddAsync(LessonDto lessonDto, Guid ownerId)
     {
-        var course = await GetCourseBySectionId(lessonDto.SectionId);
+        var course = await GetCourseBySectionIdAsync(lessonDto.SectionId);
         if (course.InstructorId != ownerId)
-            throw new Exception("sorry you dont have rights to edit in the lesson");
-        
+            throw new ForbiddenException("You do not have permission to edit this lesson.");
+
         var lesson = new Lesson
         {
             SectionId = lessonDto.SectionId,
@@ -46,7 +46,7 @@ public class LessonService
 
         await _lessonRepository.AddAsync(lesson);
         await _uow.SaveAsync();
-        
+
         return new LessonDto
         {
             Id = lesson.Id,
@@ -60,11 +60,12 @@ public class LessonService
         };
     }
 
-    public async Task<IEnumerable<LessonDto>> GetAll(Guid sectionId)
+    public async Task<IEnumerable<LessonDto>> GetAllAsync(Guid sectionId)
     {
         var lessons = await _lessonRepository.GetAllAsync(sectionId);
-        return lessons.Any() ? lessons : throw new Exception("no leesons in this section try to add one!");
+        return lessons.Any() ? lessons : throw new NotFoundException("No lessons found for this section.");
     }
+
     public async Task UploadVideoAsync(
         Guid lessonId,
         Guid ownerId,
@@ -74,13 +75,13 @@ public class LessonService
         var lesson = await _lessonRepository.GetByIdAsync(lessonId);
 
         if (lesson == null)
-            throw new Exception("Lesson not found.");
+            throw new NotFoundException("Lesson not found.");
 
-        var course = await GetCourseByLessonId(lessonId);
-        if(course.InstructorId != ownerId)
-            throw new Exception("you have no rights to upload video");
+        var course = await GetCourseByLessonIdAsync(lessonId);
+        if (course.InstructorId != ownerId)
+            throw new ForbiddenException("You do not have permission to upload a video for this lesson.");
 
-        var videoKey = await _localVideoStorgeService.UploadAsync(
+        var videoKey = await _localVideoStorageService.UploadAsync(
             video,
             lessonId,
             cancellationToken
@@ -91,47 +92,44 @@ public class LessonService
         await _uow.SaveAsync();
     }
 
-    public async Task<IEnumerable<LessonDto>> GetByCourseId(Guid courseId)
+    public async Task<IEnumerable<LessonDto>> GetByCourseIdAsync(Guid courseId)
     {
-        var sections = await _sectionRepository.GetAll(courseId);
+        var sections = await _sectionRepository.GetAllAsync(courseId);
         var lessons = new List<LessonDto>();
         foreach (var section in sections)
         {
             var lesson = await _lessonRepository.GetAllAsync(section.Id);
             if (lesson is not null)
-            {                
-            lessons.AddRange(lesson);
+            {
+                lessons.AddRange(lesson);
             }
         }
         return lessons;
-    }    
+    }
 
-    public async Task<Course> GetCourseByLessonId(Guid lessonId)
+    public async Task<Course> GetCourseByLessonIdAsync(Guid lessonId)
     {
         var lesson = await _lessonRepository.GetByIdAsync(lessonId);
         if (lesson is not null)
         {
-            var section = await _sectionRepository.GetById(lesson.SectionId);
+            var section = await _sectionRepository.GetByIdAsync(lesson.SectionId);
             if (section is not null)
             {
                 var course = await _courseRepository.GetCourseByIdAsync(section.CourseId);
-                return course ?? throw new Exception("lesson not in this course");
+                return course ?? throw new NotFoundException("Lesson not found in this course.");
             }
         }
-        throw new Exception("Lesson not found");
-
+        throw new NotFoundException("Lesson not found.");
     }
 
-    public async Task<Course> GetCourseBySectionId(Guid sectionId)
+    public async Task<Course> GetCourseBySectionIdAsync(Guid sectionId)
     {
-
-            var section = await _sectionRepository.GetById(sectionId);
-            if (section is not null)
-            {
-                var course = await _courseRepository.GetCourseByIdAsync(section.CourseId);
-                return course ?? throw new Exception("lesson not in this course");
-            }
-            throw new Exception("the section dosent belong to any course");
-
+        var section = await _sectionRepository.GetByIdAsync(sectionId);
+        if (section is not null)
+        {
+            var course = await _courseRepository.GetCourseByIdAsync(section.CourseId);
+            return course ?? throw new NotFoundException("Lesson not found in this course.");
+        }
+        throw new NotFoundException("The section does not belong to any course.");
     }
 }

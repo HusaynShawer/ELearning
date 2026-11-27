@@ -9,10 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 [Authorize]
 public class InstructorController : ControllerBase
 {
-    private readonly InstructorService _instructorService1;
+    private readonly InstructorService _instructorService;
     public InstructorController(InstructorService instructorService)
     {
-        _instructorService1 = instructorService;
+        _instructorService = instructorService;
     }
 
     [HttpGet("")]
@@ -23,17 +23,17 @@ public class InstructorController : ControllerBase
         if(!Guid.TryParse(userId,out var gId))
             return Unauthorized();
 
-        var enrollments = await _instructorService1.GetBindingAllEnrollments(gId);
+        var enrollments = await _instructorService.GetBindingAllEnrollmentsAsync(gId);
         return Ok(enrollments);
     }
 
     [HttpGet("/Confirm/{id}")]
-    public async Task<ActionResult> EnrollmentConfirm(EnrollmentConfrimDto enrollmentConfrimDto)
+    public async Task<ActionResult> EnrollmentConfirm(EnrollmentConfirmDto enrollmentConfirmDto)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if(!Guid.TryParse(userId,out var gId))
             return Unauthorized();
-        await _instructorService1.EnrollmentConfirm(enrollmentConfrimDto,gId);
+        await _instructorService.ConfirmEnrollmentAsync(enrollmentConfirmDto,gId);
         return Ok();
     }
 }

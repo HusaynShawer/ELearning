@@ -13,33 +13,33 @@ public class UserRepository
     }
 
     // Find a user using their email
-    public async Task<ApplicationUser?> GetByEmail(string email)
+    public async Task<ApplicationUser?> GetByEmailAsync(string email)
     {
         return await _context.Users
             .FirstOrDefaultAsync(u => u.Email == email);
     }
 
     // Find a user using their username
-    public async Task<ApplicationUser?> GetByUserName(string userName)
+    public async Task<ApplicationUser?> GetByUserNameAsync(string userName)
     {
         return await _context.Users
             .FirstOrDefaultAsync(u => u.UserName == userName);
     }
 
     // Add a new user to the database
-    public async Task AddUser(ApplicationUser user)
+    public async Task AddUserAsync(ApplicationUser user)
     {
         await _context.Users.AddAsync(user);
 
         await _context.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<ApplicationUser>> GetAllUsers()
+    public async Task<IEnumerable<ApplicationUser>> GetAllUsersAsync()
     {
         return await _context.Users.ToListAsync();
     }
 
-    public async Task<int> GetUserCount()
+    public async Task<int> GetUserCountAsync()
     {
         return await _context.Users.CountAsync();
     }
