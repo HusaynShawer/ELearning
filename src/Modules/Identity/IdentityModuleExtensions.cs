@@ -85,6 +85,7 @@ public static class IdentityModuleExtensions
 
         services.AddScoped<AuthService>();
         services.AddScoped<TokenService>();
+        services.AddScoped<RefreshTokenService>();
         services.AddScoped<UserService>();
         services.AddScoped<LearningService>();
         // repositories
