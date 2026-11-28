@@ -1,4 +1,5 @@
 using ELearning.Identity.Domain;
+using ELearning.Identity.Infrastructure.Configurations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -32,18 +33,6 @@ public class AppIdentityDbContext
         b.Entity<IdentityUserToken<Guid>>().ToTable("UserTokens");
         b.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
 
-        b.Entity<RefreshToken>(e =>
-        {
-            e.ToTable("RefreshTokens");
-            e.HasKey(x => x.Id);
-            e.Property(x => x.TokenHash).HasMaxLength(64).IsRequired();
-            e.Property(x => x.ReplacedByTokenHash).HasMaxLength(64);
-            e.HasIndex(x => x.TokenHash).IsUnique();
-            e.Ignore(x => x.IsActive);
-            e.HasOne<ApplicationUser>()
-                .WithMany()
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
+        b.ApplyConfiguration(new RefreshTokenConfiguration());
     }
 }

@@ -1,3 +1,4 @@
+using ELearning.Identity.Application.Abstractions;
 using ELearning.Identity.Auth;
 using ELearning.Identity.Domain;
 using ELearning.SharedKernel.Application.Exceptions;
@@ -8,11 +9,11 @@ namespace ELearning.Identity.Application.Service;
 public class AuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly TokenService _tokenService;
+    private readonly ITokenService _tokenService;
 
     public AuthService(
         UserManager<ApplicationUser> userManager,
-        TokenService tokenService)
+        ITokenService tokenService)
     {
         _userManager = userManager;
         _tokenService = tokenService;

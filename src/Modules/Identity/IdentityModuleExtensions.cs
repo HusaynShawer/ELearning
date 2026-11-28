@@ -1,7 +1,9 @@
 using ELearning.Catalog.Application;
+using ELearning.Identity.Application.Abstractions;
 using ELearning.Identity.Application.Service;
 using ELearning.Identity.Domain;
 using ELearning.Identity.Infrastructure;
+using ELearning.Identity.Infrastructure.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
@@ -84,12 +86,15 @@ public static class IdentityModuleExtensions
         });
 
         services.AddScoped<AuthService>();
-        services.AddScoped<TokenService>();
-        services.AddScoped<RefreshTokenService>();
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+        services.AddScoped<IUserCredentialValidator, UserCredentialValidator>();
+        services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddScoped<UserService>();
         services.AddScoped<LearningService>();
         // repositories
         services.AddScoped<UserRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
         return services;
     }

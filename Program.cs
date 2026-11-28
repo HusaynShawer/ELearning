@@ -3,6 +3,7 @@ using ELearning.Catalog;
 using ELearning.Enrollment;
 using ELearning.Identity;
 using ELearning.Identity.Domain;
+using ELearning.Identity.Infrastructure.Seeders;
 using ELearning.SharedKernel.API.ExceptionHandling;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi;

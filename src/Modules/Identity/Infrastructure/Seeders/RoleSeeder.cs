@@ -1,6 +1,8 @@
 using ELearning.Identity.Domain;
 using Microsoft.AspNetCore.Identity;
 
+namespace ELearning.Identity.Infrastructure.Seeders;
+
 public class RoleSeeder
 {
     public static async Task SeedAsync(RoleManager<ApplicationRole> roleManager)

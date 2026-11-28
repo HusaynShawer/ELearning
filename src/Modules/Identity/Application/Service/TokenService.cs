@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using ELearning.Identity.Application.Abstractions;
 using ELearning.Identity.Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -8,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace ELearning.Identity.Application.Service;
 
-public class TokenService
+public class TokenService : ITokenService
 {
     private readonly IConfiguration _config;
     private readonly UserManager<ApplicationUser> _userManager;

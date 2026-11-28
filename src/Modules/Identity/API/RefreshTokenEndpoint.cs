@@ -1,4 +1,4 @@
-using ELearning.Identity.Application.Service;
+using ELearning.Identity.Application.Abstractions;
 using ELearning.Identity.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 [AllowAnonymous]
 public class RefreshTokenEndpoint : ControllerBase
 {
-    private readonly RefreshTokenService _service;
+    private readonly IRefreshTokenService _service;
 
-    public RefreshTokenEndpoint(RefreshTokenService service)
+    public RefreshTokenEndpoint(IRefreshTokenService service)
     {
         _service = service;
     }
